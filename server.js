@@ -38,15 +38,7 @@ const headers = {
 // ══════════════════════════════════════════════
 
 app.get('/', (req, res) => {
-  res.json({
-    status: '✅ CargaYa backend funcionando',
-    estacion: STATION_ID,
-    webhooks: [
-      '/webhook/register',
-      '/webhook/return',
-      '/webhook/status'
-    ]
-  })
+  res.sendFile('public/cargaya-pago.html', { root: '.' })
 })
 
 
