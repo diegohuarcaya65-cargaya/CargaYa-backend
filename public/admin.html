@@ -700,7 +700,7 @@ function renderizarSlots(baterias) {
         <span class="${lightErr ? 'cable-err' : 'cable-ok'}">${lightErr ? '✗' : '✓'} Light</span>
       </div>
       <div class="slot-botones">
-        <button class="btn-expulsar" onclick="confirmarExpulsar('${bat.slot_id}')" ${!disponible ? 'disabled' : ''}>
+        <button class="btn-expulsar" onclick="confirmarExpulsar('${bat.slot_id}', '${bat.battery_id}')" ${!disponible ? 'disabled' : ''}>
           🔋 Expulsar batería
         </button>
         <button class="btn-forzar" onclick="confirmarForzar('${bat.slot_id}')">
@@ -738,23 +738,23 @@ async function reiniciarMaquina() {
   }
 }
 
-// ── EXPULSAR BATERÍA (borrow normal) ──
-function confirmarExpulsar(slotId) {
+// ── EXPULSAR BATERÍA (release con battery_id + slot_id) ──
+function confirmarExpulsar(slotId, batteryId) {
   mostrarModal(
     `🔋 Expulsar Slot ${slotId}`,
-    `Se va a expulsar la batería del slot ${slotId}. La máquina la sacará físicamente.`,
-    () => expulsarBateria(slotId),
+    `Se va a expulsar la batería ${batteryId} del slot ${slotId}. La máquina la sacará físicamente.`,
+    () => expulsarBateria(slotId, batteryId),
     true
   )
 }
 
-async function expulsarBateria(slotId) {
-  log(`Expulsando batería del slot ${slotId}...`, 'info')
+async function expulsarBateria(slotId, batteryId) {
+  log(`Expulsando batería ${batteryId} del slot ${slotId}...`, 'info')
   try {
     const res = await fetch(`${API_BASE}/api/expulsar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ slot_id: slotId })
+      body: JSON.stringify({ slot_id: slotId, battery_id: batteryId })
     })
     if (!res.ok) {
       const err = await res.json()

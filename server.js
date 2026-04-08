@@ -106,24 +106,24 @@ app.get('/api/baterias', async (req, res) => {
 // 3. Tu backend le dice a HeyCharge que libere la batería
 // 4. La estación expulsa el power bank físicamente
 
-// ✅ Endpoint correcto: POST /v1/station/:imei/borrow
-//    Solo se manda slot_id — el battery_id llega en la RESPUESTA
+// ✅ Endpoint correcto: POST /v1/station/:imei
+//    Se manda battery_id Y slot_id — confirmado en la documentación oficial
 
 app.post('/api/liberar', async (req, res) => {
   try {
-    const { slot_id } = req.body
+    const { battery_id, slot_id } = req.body
 
-    if (!slot_id) {
-      return res.status(400).json({ error: 'Falta slot_id' })
+    if (!battery_id || !slot_id) {
+      return res.status(400).json({ error: 'Faltan battery_id y/o slot_id' })
     }
 
     const response = await axios.post(
-      `${HEYCHARGE_URL}/v1/station/${STATION_ID}/borrow`,
-      { slot_id },
+      `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
+      { battery_id, slot_id },
       { headers: getAuthHeader() }
     )
 
-    console.log(`✅ Batería liberada del slot ${slot_id}`)
+    console.log(`✅ Batería ${battery_id} liberada del slot ${slot_id}`)
     console.log(`🔋 Respuesta HeyCharge:`, response.data)
 
     res.json(response.data)
@@ -142,37 +142,24 @@ app.post('/api/liberar', async (req, res) => {
 // RUTA 4 — EXPULSAR BATERÍA DESDE ADMIN
 // ══════════════════════════════════════════════
 
-// ✅ NUEVO: Para uso desde el panel admin
-// Usa /borrow igual que liberar pero con manejo de errores más claro
-// result: 0=fallo, 1=éxito, 2=timeout
+// ✅ Para uso desde el panel admin
+// Endpoint correcto: POST /v1/station/:imei con battery_id Y slot_id
 
 app.post('/api/expulsar', async (req, res) => {
   try {
-    const { slot_id } = req.body
+    const { battery_id, slot_id } = req.body
 
-    if (!slot_id) {
-      return res.status(400).json({ error: 'Falta slot_id' })
+    if (!battery_id || !slot_id) {
+      return res.status(400).json({ error: 'Faltan battery_id y/o slot_id' })
     }
 
     const response = await axios.post(
-      `${HEYCHARGE_URL}/v1/station/${STATION_ID}/borrow`,
-      { slot_id },
+      `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
+      { battery_id, slot_id },
       { headers: getAuthHeader() }
     )
 
-    const resultado = response.data.result
-
-    if (resultado === 0) {
-      console.log(`❌ Falló expulsión del slot ${slot_id}`)
-      return res.status(500).json({ error: 'HeyCharge reportó fallo al expulsar', detalle: response.data })
-    }
-
-    if (resultado === 2) {
-      console.log(`⏱️ Timeout al expulsar slot ${slot_id}`)
-      return res.status(500).json({ error: 'Timeout — la máquina no respondió', detalle: response.data })
-    }
-
-    console.log(`✅ Slot ${slot_id} expulsado desde admin`)
+    console.log(`✅ Batería ${battery_id} expulsada del slot ${slot_id} desde admin`)
     res.json(response.data)
 
   } catch (error) {
