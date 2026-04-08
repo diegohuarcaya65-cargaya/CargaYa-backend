@@ -52,10 +52,7 @@ body {
   text-align: center;
 }
 
-.login-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
-}
+.login-icon { font-size: 40px; margin-bottom: 16px; }
 
 .login-titulo {
   font-family: 'Syne', sans-serif;
@@ -65,11 +62,7 @@ body {
   margin-bottom: 6px;
 }
 
-.login-sub {
-  font-size: 12px;
-  color: var(--texto-dim);
-  margin-bottom: 28px;
-}
+.login-sub { font-size: 12px; color: var(--texto-dim); margin-bottom: 28px; }
 
 .login-input {
   width: 100%;
@@ -83,7 +76,6 @@ body {
   outline: none;
   margin-bottom: 14px;
   transition: border-color 0.2s;
-  -webkit-text-security: disc;
   letter-spacing: 3px;
 }
 
@@ -112,17 +104,11 @@ body {
 }
 
 .login-btn:hover { background: var(--verde-dim); transform: translateY(-1px); }
-.login-error {
-  color: var(--rojo);
-  font-size: 12px;
-  margin-top: 10px;
-  display: none;
-}
+.login-error { color: var(--rojo); font-size: 12px; margin-top: 10px; display: none; }
 
 /* ── ADMIN PANEL ── */
 #admin-panel { display: none; }
 
-/* HEADER */
 .header {
   background: var(--bg2);
   border-bottom: 1px solid var(--borde);
@@ -146,7 +132,6 @@ body {
 }
 
 .header-logo span { color: var(--texto-dim); font-size: 13px; font-weight: 400; font-family: 'JetBrains Mono'; }
-
 .header-right { display: flex; align-items: center; gap: 12px; }
 
 .estado-badge {
@@ -180,14 +165,12 @@ body {
 }
 .btn-logout:hover { border-color: var(--rojo); color: var(--rojo); }
 
-/* CONTENIDO */
 .contenido {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px 16px 60px;
 }
 
-/* STATS */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -212,14 +195,8 @@ body {
   margin-bottom: 4px;
 }
 
-.stat-label {
-  font-size: 11px;
-  color: var(--texto-dim);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+.stat-label { font-size: 11px; color: var(--texto-dim); text-transform: uppercase; letter-spacing: 1px; }
 
-/* ACCIONES RÁPIDAS */
 .seccion-titulo {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
@@ -253,13 +230,11 @@ body {
 .accion-btn:hover { border-color: var(--verde); background: var(--verde-glow); }
 .accion-btn:active { transform: scale(0.98); }
 .accion-btn.peligro:hover { border-color: var(--rojo); background: var(--rojo-glow); }
-.accion-btn.amarillo:hover { border-color: var(--amarillo); background: rgba(255,215,64,0.08); }
 
 .accion-icon { font-size: 20px; margin-bottom: 8px; display: block; }
 .accion-nombre { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
 .accion-desc { font-size: 11px; color: var(--texto-dim); }
 
-/* SLOTS */
 .slots-header {
   display: flex;
   align-items: center;
@@ -311,13 +286,7 @@ body {
 .slot-card.defectuosa::before { background: var(--rojo); }
 .slot-card.vacio::before { background: var(--texto-dim); }
 
-.slot-num {
-  font-size: 11px;
-  color: var(--texto-dim);
-  font-weight: 700;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-}
+.slot-num { font-size: 11px; color: var(--texto-dim); font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
 
 .slot-nivel {
   font-family: 'Syne', sans-serif;
@@ -330,22 +299,10 @@ body {
 .slot-card.defectuosa .slot-nivel { color: var(--rojo); }
 .slot-card.vacio .slot-nivel { color: var(--texto-dim); }
 
-.slot-barra {
-  height: 3px;
-  background: var(--bg3);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
+.slot-barra { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
 .slot-fill { height: 100%; border-radius: 2px; transition: width 0.5s; }
 
-.slot-id {
-  font-size: 9px;
-  color: var(--texto-dim);
-  margin-bottom: 10px;
-  word-break: break-all;
-}
+.slot-id { font-size: 9px; color: var(--texto-dim); margin-bottom: 8px; word-break: break-all; }
 
 .slot-status {
   font-size: 10px;
@@ -360,17 +317,31 @@ body {
 .slot-card.defectuosa .slot-status { background: var(--rojo-glow); color: var(--rojo); }
 .slot-card.vacio .slot-status { background: rgba(136,146,164,0.1); color: var(--texto-dim); }
 
-.slot-cables {
-  font-size: 10px;
-  color: var(--texto-dim);
-  margin-bottom: 10px;
-}
-
+.slot-cables { font-size: 10px; color: var(--texto-dim); margin-bottom: 10px; }
 .slot-cables span { margin-right: 4px; }
 .cable-ok { color: var(--verde); }
 .cable-err { color: var(--rojo); }
 
+/* ✅ NUEVO: Dos botones por slot */
+.slot-botones { display: flex; flex-direction: column; gap: 6px; }
+
 .btn-expulsar {
+  width: 100%;
+  padding: 8px;
+  background: var(--verde-glow);
+  border: 1px solid rgba(0,230,118,0.3);
+  border-radius: 8px;
+  color: var(--verde);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-expulsar:hover { background: rgba(0,230,118,0.25); }
+.btn-expulsar:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; border-color: var(--borde); color: var(--texto-dim); }
+
+.btn-forzar {
   width: 100%;
   padding: 8px;
   background: transparent;
@@ -378,20 +349,13 @@ body {
   border-radius: 8px;
   color: var(--texto-dim);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
   transition: all 0.2s;
 }
-.btn-expulsar:hover { border-color: var(--amarillo); color: var(--amarillo); background: rgba(255,215,64,0.05); }
-.btn-expulsar:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-forzar:hover { border-color: var(--amarillo); color: var(--amarillo); }
 
-/* LOADING */
-.loading-slots {
-  text-align: center;
-  padding: 40px;
-  color: var(--texto-dim);
-  font-size: 13px;
-}
+.loading-slots { text-align: center; padding: 40px; color: var(--texto-dim); font-size: 13px; }
 
 .spinner {
   width: 28px; height: 28px;
@@ -402,7 +366,6 @@ body {
   margin: 0 auto 12px;
 }
 
-/* LOG */
 .log-box {
   background: var(--bg2);
   border: 1px solid var(--borde);
@@ -421,7 +384,6 @@ body {
 .log-line.info { color: var(--azul); }
 .log-line.warn { color: var(--amarillo); }
 
-/* TOAST */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -441,7 +403,6 @@ body {
 .toast.ok { border-color: var(--verde); color: var(--verde); }
 .toast.err { border-color: var(--rojo); color: var(--rojo); }
 
-/* MODAL CONFIRM */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.7);
@@ -495,7 +456,6 @@ body {
 <!-- ── ADMIN PANEL ── -->
 <div id="admin-panel">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-logo">
       ⚡ CargaYa <span>/ admin</span>
@@ -509,10 +469,8 @@ body {
     </div>
   </div>
 
-  <!-- CONTENIDO -->
   <div class="contenido">
 
-    <!-- STATS -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-valor" id="stat-total">—</div>
@@ -532,7 +490,6 @@ body {
       </div>
     </div>
 
-    <!-- ACCIONES RÁPIDAS -->
     <div class="seccion-titulo">Acciones rápidas</div>
     <div class="acciones-grid">
       <button class="accion-btn" onclick="actualizarDatos()">
@@ -547,13 +504,11 @@ body {
       </button>
     </div>
 
-    <!-- LOG -->
     <div class="seccion-titulo">Registro de actividad</div>
     <div class="log-box" id="log-box">
       <div class="log-line info">[ Sistema iniciado ]</div>
     </div>
 
-    <!-- SLOTS -->
     <div class="slots-header">
       <div class="seccion-titulo" style="margin:0">Slots de la estación</div>
       <button class="btn-refresh" id="btn-refresh" onclick="actualizarDatos()">↻ Refrescar</button>
@@ -569,31 +524,24 @@ body {
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- MODAL CONFIRM -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-titulo" id="modal-titulo">¿Estás seguro?</div>
     <div class="modal-texto" id="modal-texto">Esta acción no se puede deshacer.</div>
     <div class="modal-btns">
       <button class="modal-btn cancelar" onclick="cerrarModal()">Cancelar</button>
-      <button class="modal-btn confirmar" id="modal-confirmar" onclick="">Confirmar</button>
+      <button class="modal-btn confirmar" id="modal-confirmar">Confirmar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════
 const PASSWORD = 'elrecontrachucha123@'
-const API_BASE = '' // mismo dominio, rutas relativas
+const API_BASE = ''
 
-// ══════════════════════════════════════════════
-// LOGIN
-// ══════════════════════════════════════════════
+// ── LOGIN ──
 function login() {
   const val = document.getElementById('password-input').value
   const input = document.getElementById('password-input')
@@ -617,16 +565,13 @@ function logout() {
   location.reload()
 }
 
-// Auto-login si ya estaba autenticado en esta sesión
 if (sessionStorage.getItem('admin_auth') === '1') {
   document.getElementById('login-screen').style.display = 'none'
   document.getElementById('admin-panel').style.display = 'block'
   iniciarPanel()
 }
 
-// ══════════════════════════════════════════════
-// LOG
-// ══════════════════════════════════════════════
+// ── LOG ──
 function log(msg, tipo = 'info') {
   const box = document.getElementById('log-box')
   const ahora = new Date().toLocaleTimeString('es-PE')
@@ -637,9 +582,7 @@ function log(msg, tipo = 'info') {
   box.scrollTop = box.scrollHeight
 }
 
-// ══════════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════════
+// ── TOAST ──
 function toast(msg, tipo = 'ok') {
   const el = document.getElementById('toast')
   el.textContent = msg
@@ -647,9 +590,7 @@ function toast(msg, tipo = 'ok') {
   setTimeout(() => el.classList.remove('visible'), 3000)
 }
 
-// ══════════════════════════════════════════════
-// MODAL
-// ══════════════════════════════════════════════
+// ── MODAL ──
 let modalCallback = null
 
 function mostrarModal(titulo, texto, callback, esVerde = false) {
@@ -666,23 +607,18 @@ function cerrarModal() {
   document.getElementById('modal').classList.remove('visible')
 }
 
-// ══════════════════════════════════════════════
-// INICIAR PANEL
-// ══════════════════════════════════════════════
+// ── INICIAR ──
 function iniciarPanel() {
   log('Panel admin iniciado', 'ok')
   actualizarDatos()
-  // Auto-refresh cada 30 segundos
   setInterval(actualizarDatos, 30000)
 }
 
-// ══════════════════════════════════════════════
-// ACTUALIZAR DATOS
-// ══════════════════════════════════════════════
+// ── ACTUALIZAR DATOS ──
 async function actualizarDatos() {
   const btnRef = document.getElementById('btn-refresh')
   btnRef.classList.add('girando')
-  log('Actualizando datos de la estación...', 'info')
+  log('Actualizando datos...', 'info')
 
   try {
     const res = await fetch(`${API_BASE}/api/baterias`)
@@ -692,35 +628,29 @@ async function actualizarDatos() {
     actualizarEstado(true)
     actualizarStats(data)
     renderizarSlots(data.baterias || [])
-    log(`✓ Datos actualizados — ${data.disponibles} disponibles de ${data.total}`, 'ok')
+    log(`✓ ${data.disponibles} disponibles de ${data.total}`, 'ok')
 
   } catch (err) {
     actualizarEstado(false)
-    log(`✗ Error al conectar: ${err.message}`, 'err')
-    toast('❌ Error al conectar con la estación', 'err')
+    log(`✗ Error: ${err.message}`, 'err')
+    toast('❌ Error al conectar', 'err')
   }
 
   btnRef.classList.remove('girando')
 }
 
-// ══════════════════════════════════════════════
-// ESTADO ONLINE/OFFLINE
-// ══════════════════════════════════════════════
+// ── ESTADO ──
 function actualizarEstado(online) {
   const badge = document.getElementById('estado-badge')
   const texto = document.getElementById('estado-texto')
   badge.className = `estado-badge ${online ? 'online' : 'offline'}`
   texto.textContent = online ? 'Online' : 'Offline'
-  const dot = badge.querySelector('.dot')
-  dot.className = `dot ${online ? 'pulse' : ''}`
+  badge.querySelector('.dot').className = `dot ${online ? 'pulse' : ''}`
 }
 
-// ══════════════════════════════════════════════
-// STATS
-// ══════════════════════════════════════════════
+// ── STATS ──
 function actualizarStats(data) {
   const baterias = data.baterias || []
-  const disponibles = baterias.filter(b => b.lock_status === '1' && b.battery_abnormal === '0')
   const defectuosas = baterias.filter(b => b.battery_abnormal === '1' || b.cable_abnormal === '1')
   const promedio = baterias.length > 0
     ? Math.round(baterias.reduce((s, b) => s + parseInt(b.battery_capacity || 0), 0) / baterias.length)
@@ -732,9 +662,7 @@ function actualizarStats(data) {
   document.getElementById('stat-promedio').textContent = promedio + '%'
 }
 
-// ══════════════════════════════════════════════
-// RENDERIZAR SLOTS
-// ══════════════════════════════════════════════
+// ── SLOTS ──
 function renderizarSlots(baterias) {
   const container = document.getElementById('slots-container')
 
@@ -749,14 +677,12 @@ function renderizarSlots(baterias) {
   baterias.forEach(bat => {
     const nivel = parseInt(bat.battery_capacity) || 0
     const defectuosa = bat.battery_abnormal === '1'
-    const cableErr = bat.cable_abnormal === '1'
     const microErr = bat.cable_micro_abnormal === '1'
     const lightErr = bat.cable_lightning_abnormal === '1'
     const cErr = bat.cable_c_abnormal === '1'
     const disponible = bat.lock_status === '1' && !defectuosa
-
-    let clase = disponible ? 'disponible' : defectuosa ? 'defectuosa' : 'vacio'
-    let fillColor = nivel > 60 ? '#00E676' : nivel > 30 ? '#FFD740' : '#FF5252'
+    const clase = disponible ? 'disponible' : defectuosa ? 'defectuosa' : 'vacio'
+    const fillColor = nivel > 60 ? '#00E676' : nivel > 30 ? '#FFD740' : '#FF5252'
 
     const card = document.createElement('div')
     card.className = `slot-card ${clase}`
@@ -773,9 +699,14 @@ function renderizarSlots(baterias) {
         <span class="${cErr ? 'cable-err' : 'cable-ok'}">${cErr ? '✗' : '✓'} USB-C</span>
         <span class="${lightErr ? 'cable-err' : 'cable-ok'}">${lightErr ? '✗' : '✓'} Light</span>
       </div>
-      <button class="btn-expulsar" onclick="confirmarExpulsar('${bat.slot_id}')" ${!disponible && !defectuosa ? 'disabled' : ''}>
-        🔓 Forzar expulsión
-      </button>
+      <div class="slot-botones">
+        <button class="btn-expulsar" onclick="confirmarExpulsar('${bat.slot_id}')" ${!disponible ? 'disabled' : ''}>
+          🔋 Expulsar batería
+        </button>
+        <button class="btn-forzar" onclick="confirmarForzar('${bat.slot_id}')">
+          🔧 Forzar (trabada)
+        </button>
+      </div>
     `
     grid.appendChild(card)
   })
@@ -784,45 +715,71 @@ function renderizarSlots(baterias) {
   container.appendChild(grid)
 }
 
-// ══════════════════════════════════════════════
-// REINICIAR MÁQUINA
-// ══════════════════════════════════════════════
+// ── REINICIAR ──
 function confirmarReinicio() {
   mostrarModal(
     '🔌 Reiniciar estación',
-    'La máquina se reiniciará. Los clientes no podrán usar la estación por unos segundos.',
+    'La máquina se reiniciará por unos segundos.',
     reiniciarMaquina
   )
 }
 
 async function reiniciarMaquina() {
-  log('Enviando comando de reinicio...', 'warn')
+  log('Reiniciando máquina...', 'warn')
   try {
     const res = await fetch(`${API_BASE}/api/reiniciar`, { method: 'POST' })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    log('✓ Máquina reiniciada correctamente', 'ok')
+    log('✓ Máquina reiniciada', 'ok')
     toast('✅ Máquina reiniciando...')
     setTimeout(actualizarDatos, 5000)
   } catch (err) {
-    log(`✗ Error al reiniciar: ${err.message}`, 'err')
+    log(`✗ Error: ${err.message}`, 'err')
     toast('❌ Error al reiniciar', 'err')
   }
 }
 
-// ══════════════════════════════════════════════
-// FORZAR EXPULSIÓN
-// ══════════════════════════════════════════════
+// ── EXPULSAR BATERÍA (borrow normal) ──
 function confirmarExpulsar(slotId) {
   mostrarModal(
-    `🔓 Forzar Slot ${slotId}`,
-    `¿Seguro que quieres forzar la expulsión del slot ${slotId}? Úsalo solo si la batería está trabada.`,
-    () => forzarExpulsion(slotId),
+    `🔋 Expulsar Slot ${slotId}`,
+    `Se va a expulsar la batería del slot ${slotId}. La máquina la sacará físicamente.`,
+    () => expulsarBateria(slotId),
     true
   )
 }
 
-async function forzarExpulsion(slotId) {
-  log(`Forzando expulsión del slot ${slotId}...`, 'warn')
+async function expulsarBateria(slotId) {
+  log(`Expulsando batería del slot ${slotId}...`, 'info')
+  try {
+    const res = await fetch(`${API_BASE}/api/expulsar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slot_id: slotId })
+    })
+    if (!res.ok) {
+      const err = await res.json()
+      throw new Error(err.error || `HTTP ${res.status}`)
+    }
+    log(`✓ Slot ${slotId} expulsado correctamente`, 'ok')
+    toast(`✅ Slot ${slotId} expulsado!`)
+    setTimeout(actualizarDatos, 2000)
+  } catch (err) {
+    log(`✗ Error slot ${slotId}: ${err.message}`, 'err')
+    toast(`❌ ${err.message}`, 'err')
+  }
+}
+
+// ── FORZAR (slot trabado) ──
+function confirmarForzar(slotId) {
+  mostrarModal(
+    `🔧 Forzar Slot ${slotId}`,
+    `Solo úsalo si la batería está TRABADA físicamente. No funciona para expulsión normal.`,
+    () => forzarSlot(slotId)
+  )
+}
+
+async function forzarSlot(slotId) {
+  log(`Forzando slot ${slotId}...`, 'warn')
   try {
     const res = await fetch(`${API_BASE}/api/forzar`, {
       method: 'POST',
@@ -830,12 +787,12 @@ async function forzarExpulsion(slotId) {
       body: JSON.stringify({ slot_id: slotId })
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    log(`✓ Slot ${slotId} desbloqueado`, 'ok')
-    toast(`✅ Slot ${slotId} desbloqueado`)
+    log(`✓ Slot ${slotId} forzado`, 'ok')
+    toast(`✅ Slot ${slotId} forzado`)
     setTimeout(actualizarDatos, 2000)
   } catch (err) {
-    log(`✗ Error slot ${slotId}: ${err.message}`, 'err')
-    toast(`❌ Error al desbloquear slot ${slotId}`, 'err')
+    log(`✗ Error: ${err.message}`, 'err')
+    toast(`❌ Error al forzar`, 'err')
   }
 }
 </script>

@@ -71,7 +71,6 @@ app.get('/api/estacion', async (req, res) => {
 // RUTA 2 — VER TODAS LAS BATERÍAS DISPONIBLES
 // ══════════════════════════════════════════════
 
-// La info de baterías viene dentro del objeto estación
 app.get('/api/baterias', async (req, res) => {
   try {
     const response = await axios.get(
@@ -101,15 +100,14 @@ app.get('/api/baterias', async (req, res) => {
 // RUTA 3 — LIBERAR UNA BATERÍA (cuando el cliente paga)
 // ══════════════════════════════════════════════
 
-// El flujo es:
+// Flujo:
 // 1. Cliente paga con Yape/Plin/Tarjeta
-// 2. Culqi confirma el pago a este endpoint
+// 2. Culqi confirma el pago
 // 3. Tu backend le dice a HeyCharge que libere la batería
 // 4. La estación expulsa el power bank físicamente
 
-// ✅ CORREGIDO: El endpoint correcto es POST /v1/station/:imei/borrow
-//              Solo se manda slot_id (NO battery_id)
-//              El battery_id llega en la RESPUESTA de HeyCharge
+// ✅ Endpoint correcto: POST /v1/station/:imei/borrow
+//    Solo se manda slot_id — el battery_id llega en la RESPUESTA
 
 app.post('/api/liberar', async (req, res) => {
   try {
@@ -128,7 +126,6 @@ app.post('/api/liberar', async (req, res) => {
     console.log(`✅ Batería liberada del slot ${slot_id}`)
     console.log(`🔋 Respuesta HeyCharge:`, response.data)
 
-    // La respuesta incluye: battery_id, result (0=fallo, 1=éxito, 2=timeout)
     res.json(response.data)
 
   } catch (error) {
@@ -142,11 +139,59 @@ app.post('/api/liberar', async (req, res) => {
 
 
 // ══════════════════════════════════════════════
-// RUTA 4 — FORCE UNLOCK (desbloquear slot a la fuerza)
+// RUTA 4 — EXPULSAR BATERÍA DESDE ADMIN
 // ══════════════════════════════════════════════
 
-// Útil si una batería se traba en el slot
-// ✅ Confirmado en doc: POST /v1/station/:imei/forceUnlock con { slot_id }
+// ✅ NUEVO: Para uso desde el panel admin
+// Usa /borrow igual que liberar pero con manejo de errores más claro
+// result: 0=fallo, 1=éxito, 2=timeout
+
+app.post('/api/expulsar', async (req, res) => {
+  try {
+    const { slot_id } = req.body
+
+    if (!slot_id) {
+      return res.status(400).json({ error: 'Falta slot_id' })
+    }
+
+    const response = await axios.post(
+      `${HEYCHARGE_URL}/v1/station/${STATION_ID}/borrow`,
+      { slot_id },
+      { headers: getAuthHeader() }
+    )
+
+    const resultado = response.data.result
+
+    if (resultado === 0) {
+      console.log(`❌ Falló expulsión del slot ${slot_id}`)
+      return res.status(500).json({ error: 'HeyCharge reportó fallo al expulsar', detalle: response.data })
+    }
+
+    if (resultado === 2) {
+      console.log(`⏱️ Timeout al expulsar slot ${slot_id}`)
+      return res.status(500).json({ error: 'Timeout — la máquina no respondió', detalle: response.data })
+    }
+
+    console.log(`✅ Slot ${slot_id} expulsado desde admin`)
+    res.json(response.data)
+
+  } catch (error) {
+    console.error('❌ Error al expulsar slot:', error.response?.data || error.message)
+    res.status(500).json({
+      error: error.message,
+      detalle: error.response?.data || 'Sin detalles'
+    })
+  }
+})
+
+
+// ══════════════════════════════════════════════
+// RUTA 5 — FORCE UNLOCK (slot trabado)
+// ══════════════════════════════════════════════
+
+// Solo para cuando una batería está físicamente trabada
+// ✅ POST /v1/station/:imei/forceUnlock con { slot_id }
+
 app.post('/api/forzar', async (req, res) => {
   try {
     const { slot_id } = req.body
@@ -175,11 +220,11 @@ app.post('/api/forzar', async (req, res) => {
 
 
 // ══════════════════════════════════════════════
-// RUTA 5 — REINICIAR ESTACIÓN
+// RUTA 6 — REINICIAR ESTACIÓN
 // ══════════════════════════════════════════════
 
-// Útil si la máquina se cuelga
-// ✅ Confirmado en doc: POST /v1/station/:imei/reboot
+// ✅ POST /v1/station/:imei/reboot
+
 app.post('/api/reiniciar', async (req, res) => {
   try {
     const response = await axios.post(
@@ -205,8 +250,7 @@ app.post('/api/reiniciar', async (req, res) => {
 // WEBHOOK 1 — ESTACIÓN SE CONECTA A INTERNET
 // ══════════════════════════════════════════════
 
-// HeyCharge llama a este endpoint cuando la estación se enciende/conecta
-// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/register
+// URL: https://cargaya-backend-production.up.railway.app/webhook/register
 
 app.post('/webhook/register', (req, res) => {
   console.log('📡 WEBHOOK - Estación conectada:', req.body)
@@ -222,7 +266,6 @@ app.post('/webhook/register', (req, res) => {
     })
   }
 
-  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
@@ -231,8 +274,7 @@ app.post('/webhook/register', (req, res) => {
 // WEBHOOK 2 — USUARIO DEVUELVE BATERÍA
 // ══════════════════════════════════════════════
 
-// HeyCharge llama a este endpoint cuando alguien devuelve un power bank
-// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/return
+// URL: https://cargaya-backend-production.up.railway.app/webhook/return
 
 app.post('/webhook/return', (req, res) => {
   console.log('↩️ WEBHOOK - Batería devuelta:', req.body)
@@ -244,9 +286,8 @@ app.post('/webhook/return', (req, res) => {
   if (battery_abnormal === '1') console.log(`⚠️ ALERTA: Batería defectuosa!`)
   if (cable_abnormal === '1') console.log(`⚠️ ALERTA: Cable perdido o roto!`)
 
-  // TODO: aquí irá la lógica de cobro final con Culqi/Yape/Plin
+  // TODO: lógica de cobro final con Culqi/Yape/Plin
 
-  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
@@ -255,8 +296,7 @@ app.post('/webhook/return', (req, res) => {
 // WEBHOOK 3 — ESTACIÓN SE DESCONECTA / RECONECTA
 // ══════════════════════════════════════════════
 
-// HeyCharge llama a este endpoint cuando cambia el estado de conexión
-// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/status
+// URL: https://cargaya-backend-production.up.railway.app/webhook/status
 
 app.post('/webhook/status', (req, res) => {
   console.log('📡 WEBHOOK - Cambio de estado:', req.body)
@@ -270,7 +310,6 @@ app.post('/webhook/status', (req, res) => {
     console.log(`✅ Estación ${imei} volvió a conectarse`)
   }
 
-  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
@@ -286,7 +325,13 @@ app.listen(PORT, () => {
   console.log(`🔑 API Key: ${API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA ❌'}`)
   console.log(`📡 Estación: ${STATION_ID}`)
   console.log(``)
-  console.log(`📌 Webhooks listos en:`)
+  console.log(`📌 Rutas disponibles:`)
+  console.log(`   GET  /api/estacion`)
+  console.log(`   GET  /api/baterias`)
+  console.log(`   POST /api/liberar    ← cliente paga`)
+  console.log(`   POST /api/expulsar   ← admin expulsa`)
+  console.log(`   POST /api/forzar     ← slot trabado`)
+  console.log(`   POST /api/reiniciar`)
   console.log(`   POST /webhook/register`)
   console.log(`   POST /webhook/return`)
   console.log(`   POST /webhook/status`)
