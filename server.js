@@ -26,7 +26,7 @@ const STATION_ID = 'DCHEYS2603000893'
 // Tu API key (viene del .env para mantenerla segura)
 const API_KEY = process.env.HEYCHARGE_API_KEY
 
-// ✅ CORREGIDO: HeyCharge usa HTTP Basic Auth
+// HeyCharge usa HTTP Basic Auth
 // La API key va como username, sin contraseña (por eso los dos puntos al final)
 const getAuthHeader = () => {
   const encoded = Buffer.from(API_KEY + ':').toString('base64')
@@ -71,7 +71,7 @@ app.get('/api/estacion', async (req, res) => {
 // RUTA 2 — VER TODAS LAS BATERÍAS DISPONIBLES
 // ══════════════════════════════════════════════
 
-// ✅ NOTA: La info de baterías viene dentro del objeto estación
+// La info de baterías viene dentro del objeto estación
 app.get('/api/baterias', async (req, res) => {
   try {
     const response = await axios.get(
@@ -107,23 +107,28 @@ app.get('/api/baterias', async (req, res) => {
 // 3. Tu backend le dice a HeyCharge que libere la batería
 // 4. La estación expulsa el power bank físicamente
 
+// ✅ CORREGIDO: El endpoint correcto es POST /v1/station/:imei/borrow
+//              Solo se manda slot_id (NO battery_id)
+//              El battery_id llega en la RESPUESTA de HeyCharge
+
 app.post('/api/liberar', async (req, res) => {
   try {
-    const { battery_id, slot_id } = req.body
+    const { slot_id } = req.body
 
-    // ✅ CORREGIDO: La doc pide battery_id Y slot_id
-    if (!battery_id || !slot_id) {
-      return res.status(400).json({ error: 'Faltan battery_id y/o slot_id' })
+    if (!slot_id) {
+      return res.status(400).json({ error: 'Falta slot_id' })
     }
 
-    // ✅ CORREGIDO: Endpoint POST /v1/station/:imei con battery_id y slot_id
     const response = await axios.post(
-      `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
-      { battery_id, slot_id },
+      `${HEYCHARGE_URL}/v1/station/${STATION_ID}/borrow`,
+      { slot_id },
       { headers: getAuthHeader() }
     )
 
-    console.log(`✅ Batería ${battery_id} liberada del slot ${slot_id}`)
+    console.log(`✅ Batería liberada del slot ${slot_id}`)
+    console.log(`🔋 Respuesta HeyCharge:`, response.data)
+
+    // La respuesta incluye: battery_id, result (0=fallo, 1=éxito, 2=timeout)
     res.json(response.data)
 
   } catch (error) {
@@ -140,7 +145,8 @@ app.post('/api/liberar', async (req, res) => {
 // RUTA 4 — FORCE UNLOCK (desbloquear slot a la fuerza)
 // ══════════════════════════════════════════════
 
-// ✅ NUEVO: Útil si una batería se traba en el slot
+// Útil si una batería se traba en el slot
+// ✅ Confirmado en doc: POST /v1/station/:imei/forceUnlock con { slot_id }
 app.post('/api/forzar', async (req, res) => {
   try {
     const { slot_id } = req.body
@@ -172,7 +178,8 @@ app.post('/api/forzar', async (req, res) => {
 // RUTA 5 — REINICIAR ESTACIÓN
 // ══════════════════════════════════════════════
 
-// ✅ NUEVO: Útil si la máquina se cuelga
+// Útil si la máquina se cuelga
+// ✅ Confirmado en doc: POST /v1/station/:imei/reboot
 app.post('/api/reiniciar', async (req, res) => {
   try {
     const response = await axios.post(
@@ -198,6 +205,9 @@ app.post('/api/reiniciar', async (req, res) => {
 // WEBHOOK 1 — ESTACIÓN SE CONECTA A INTERNET
 // ══════════════════════════════════════════════
 
+// HeyCharge llama a este endpoint cuando la estación se enciende/conecta
+// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/register
+
 app.post('/webhook/register', (req, res) => {
   console.log('📡 WEBHOOK - Estación conectada:', req.body)
 
@@ -212,6 +222,7 @@ app.post('/webhook/register', (req, res) => {
     })
   }
 
+  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
@@ -219,6 +230,9 @@ app.post('/webhook/register', (req, res) => {
 // ══════════════════════════════════════════════
 // WEBHOOK 2 — USUARIO DEVUELVE BATERÍA
 // ══════════════════════════════════════════════
+
+// HeyCharge llama a este endpoint cuando alguien devuelve un power bank
+// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/return
 
 app.post('/webhook/return', (req, res) => {
   console.log('↩️ WEBHOOK - Batería devuelta:', req.body)
@@ -230,15 +244,19 @@ app.post('/webhook/return', (req, res) => {
   if (battery_abnormal === '1') console.log(`⚠️ ALERTA: Batería defectuosa!`)
   if (cable_abnormal === '1') console.log(`⚠️ ALERTA: Cable perdido o roto!`)
 
-  // TODO: aquí irá la lógica de cobro con Culqi/Yape/Plin
+  // TODO: aquí irá la lógica de cobro final con Culqi/Yape/Plin
 
+  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
 
 // ══════════════════════════════════════════════
-// WEBHOOK 3 — ESTACIÓN SE DESCONECTA
+// WEBHOOK 3 — ESTACIÓN SE DESCONECTA / RECONECTA
 // ══════════════════════════════════════════════
+
+// HeyCharge llama a este endpoint cuando cambia el estado de conexión
+// URL configurada: https://cargaya-backend-production.up.railway.app/webhook/status
 
 app.post('/webhook/status', (req, res) => {
   console.log('📡 WEBHOOK - Cambio de estado:', req.body)
@@ -252,6 +270,7 @@ app.post('/webhook/status', (req, res) => {
     console.log(`✅ Estación ${imei} volvió a conectarse`)
   }
 
+  // HeyCharge espera esta respuesta exacta
   res.json({ code: 0, message: 'success' })
 })
 
@@ -266,4 +285,9 @@ app.listen(PORT, () => {
   console.log(`✅ CargaYa backend corriendo en http://localhost:${PORT}`)
   console.log(`🔑 API Key: ${API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA ❌'}`)
   console.log(`📡 Estación: ${STATION_ID}`)
+  console.log(``)
+  console.log(`📌 Webhooks listos en:`)
+  console.log(`   POST /webhook/register`)
+  console.log(`   POST /webhook/return`)
+  console.log(`   POST /webhook/status`)
 })
