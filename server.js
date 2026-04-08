@@ -30,11 +30,20 @@ const API_KEY = process.env.HEYCHARGE_API_KEY
 // La API key va como username, sin contraseña (por eso los dos puntos al final)
 const getAuthHeader = () => {
   const encoded = Buffer.from(API_KEY + ':').toString('base64')
-  return {
-    'Authorization': `Basic ${encoded}`,
-    'Content-Type': 'application/json'
-  }
+  return `Basic ${encoded}`
 }
+
+// Headers para JSON (GET requests)
+const jsonHeaders = () => ({
+  'Authorization': getAuthHeader(),
+  'Content-Type': 'application/json'
+})
+
+// Headers para Form (POST release — HeyCharge lo requiere así)
+const formHeaders = () => ({
+  'Authorization': getAuthHeader(),
+  'Content-Type': 'application/x-www-form-urlencoded'
+})
 
 
 // ══════════════════════════════════════════════
@@ -54,7 +63,7 @@ app.get('/api/estacion', async (req, res) => {
   try {
     const response = await axios.get(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
-      { headers: getAuthHeader() }
+      { headers: jsonHeaders() }
     )
     res.json(response.data)
   } catch (error) {
@@ -75,7 +84,7 @@ app.get('/api/baterias', async (req, res) => {
   try {
     const response = await axios.get(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
-      { headers: getAuthHeader() }
+      { headers: jsonHeaders() }
     )
 
     const baterias = response.data.batteries || []
@@ -106,8 +115,8 @@ app.get('/api/baterias', async (req, res) => {
 // 3. Tu backend le dice a HeyCharge que libere la batería
 // 4. La estación expulsa el power bank físicamente
 
-// ✅ Endpoint correcto: POST /v1/station/:imei
-//    Se manda battery_id Y slot_id — confirmado en la documentación oficial
+// ✅ Endpoint: POST /v1/station/:imei
+// ✅ Parámetros: battery_id y slot_id como form-urlencoded
 
 app.post('/api/liberar', async (req, res) => {
   try {
@@ -117,10 +126,15 @@ app.post('/api/liberar', async (req, res) => {
       return res.status(400).json({ error: 'Faltan battery_id y/o slot_id' })
     }
 
+    // HeyCharge requiere form-urlencoded, NO json
+    const params = new URLSearchParams()
+    params.append('battery_id', battery_id)
+    params.append('slot_id', slot_id)
+
     const response = await axios.post(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
-      { battery_id, slot_id },
-      { headers: getAuthHeader() }
+      params,
+      { headers: formHeaders() }
     )
 
     console.log(`✅ Batería ${battery_id} liberada del slot ${slot_id}`)
@@ -142,8 +156,7 @@ app.post('/api/liberar', async (req, res) => {
 // RUTA 4 — EXPULSAR BATERÍA DESDE ADMIN
 // ══════════════════════════════════════════════
 
-// ✅ Para uso desde el panel admin
-// Endpoint correcto: POST /v1/station/:imei con battery_id Y slot_id
+// ✅ Mismo endpoint que liberar, para uso desde el panel admin
 
 app.post('/api/expulsar', async (req, res) => {
   try {
@@ -153,10 +166,15 @@ app.post('/api/expulsar', async (req, res) => {
       return res.status(400).json({ error: 'Faltan battery_id y/o slot_id' })
     }
 
+    // HeyCharge requiere form-urlencoded, NO json
+    const params = new URLSearchParams()
+    params.append('battery_id', battery_id)
+    params.append('slot_id', slot_id)
+
     const response = await axios.post(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}`,
-      { battery_id, slot_id },
-      { headers: getAuthHeader() }
+      params,
+      { headers: formHeaders() }
     )
 
     console.log(`✅ Batería ${battery_id} expulsada del slot ${slot_id} desde admin`)
@@ -190,7 +208,7 @@ app.post('/api/forzar', async (req, res) => {
     const response = await axios.post(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}/forceUnlock`,
       { slot_id },
-      { headers: getAuthHeader() }
+      { headers: jsonHeaders() }
     )
 
     console.log(`🔓 Slot ${slot_id} desbloqueado a la fuerza`)
@@ -217,7 +235,7 @@ app.post('/api/reiniciar', async (req, res) => {
     const response = await axios.post(
       `${HEYCHARGE_URL}/v1/station/${STATION_ID}/reboot`,
       {},
-      { headers: getAuthHeader() }
+      { headers: jsonHeaders() }
     )
 
     console.log(`🔄 Estación reiniciada`)
