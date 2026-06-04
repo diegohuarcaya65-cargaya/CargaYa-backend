@@ -712,6 +712,7 @@ footer strong{color:#fff;}
 
 <div class="toast" id="toast">✅ ¡Reclamación enviada exitosamente!</div>
 
+<script src="https://checkout.culqi.com/js/v4"></script>
 <script>
   let planSeleccionado = {horas:2, monto:12};
 
@@ -723,11 +724,70 @@ footer strong{color:#fff;}
   }
 
   function iniciarPago() {
-    // TODO: Reemplazar con Culqi Checkout cuando tengas las llaves
-    // Culqi.publicKey = "pk_live_TU_LLAVE";
-    // Culqi.settings({ title:"CargaYa", currency:"PEN", amount: planSeleccionado.monto * 100 });
-    // Culqi.open();
-    alert(`⚡ Sistema de pagos en configuración.\n\nPlan seleccionado: ${planSeleccionado.horas} hora${planSeleccionado.horas>1?'s':''} por S/${planSeleccionado.monto}\n\nPara alquilar ahora contáctanos:\nWhatsApp: 996 481 751`);
+    // Configurar Culqi con la llave pública
+    Culqi.publicKey = "pk_test_eLaejI2frA9LpArx";
+
+    // Configurar el checkout
+    Culqi.settings({
+      title: 'CargaYa',
+      currency: 'PEN',
+      description: `Alquiler Power Bank - ${planSeleccionado.horas} hora${planSeleccionado.horas>1?'s':''}`,
+      amount: planSeleccionado.monto * 100
+    });
+
+    // Opciones adicionales del checkout
+    Culqi.options({
+      lang: 'auto',
+      modal: true,
+      installments: false,
+      paymentMethods: {
+        tarjeta: true,
+        yape: true,
+        billetera: false,
+        bancaMovil: false,
+        agente: false,
+        cuotealo: false
+      }
+    });
+
+    // Abrir el formulario de Culqi
+    Culqi.open();
+  }
+
+  // Función que Culqi llama cuando el pago es exitoso
+  function culqi() {
+    if (Culqi.token) {
+      // Pago exitoso: enviar token al backend para procesar
+      const token = Culqi.token.id;
+      const email = Culqi.token.email;
+
+      fetch('/api/pagar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: token,
+          email: email,
+          monto: planSeleccionado.monto * 100,
+          horas: planSeleccionado.horas
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        Culqi.close();
+        if (data.success) {
+          alert(`✅ ¡Pago exitoso!\n\nTu power bank saldrá en unos segundos.\n\nDuración: ${planSeleccionado.horas} hora${planSeleccionado.horas>1?'s':''}\nMonto cobrado: S/${planSeleccionado.monto}`);
+        } else {
+          alert('❌ Error al procesar el pago. Intenta nuevamente.');
+        }
+      })
+      .catch(() => {
+        Culqi.close();
+        alert('❌ Error de conexión. Intenta nuevamente.');
+      });
+
+    } else if (Culqi.error) {
+      alert('❌ Error: ' + Culqi.error.user_message);
+    }
   }
 
   function abrirModal(id) {
