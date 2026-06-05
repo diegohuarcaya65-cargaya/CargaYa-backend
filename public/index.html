@@ -459,6 +459,121 @@ footer strong{color:#fff;}
   .planes-grid{grid-template-columns:1fr;}
   .pagos-grid{grid-template-columns:repeat(3,1fr);}
 }
+
+/* ─── PANTALLA TIMER ─── */
+#pantalla-timer{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#f0f7f2;
+  z-index:9999;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:30px 20px;
+  text-align:center;
+}
+#pantalla-timer.activo{display:flex;}
+.timer-badge{
+  background:linear-gradient(135deg,#1a7a3c,#2ecc71);
+  color:#fff;
+  padding:8px 20px;
+  border-radius:100px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+.timer-circulo{
+  width:220px;height:220px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 8px 40px rgba(26,122,60,0.15);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  margin-bottom:24px;
+  position:relative;
+}
+.timer-circulo::before{
+  content:'';
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  background:conic-gradient(var(--verde-claro) var(--progress,100%), #e0e0e0 0%);
+  z-index:-1;
+}
+.timer-emoji{font-size:36px;margin-bottom:4px;}
+.timer-tiempo{
+  font-family:'Nunito',sans-serif;
+  font-size:3.2rem;
+  font-weight:900;
+  color:#1a7a3c;
+  line-height:1;
+}
+.timer-label{font-size:13px;color:#888;font-weight:600;margin-top:4px;}
+.timer-info{
+  background:#fff;
+  border-radius:16px;
+  padding:16px 24px;
+  margin-bottom:20px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  width:100%;max-width:320px;
+}
+.timer-info p{font-size:14px;color:#555;margin-bottom:4px;}
+.timer-info strong{color:#1a7a3c;}
+.timer-aviso{
+  background:#fff3cd;
+  border:1px solid #ffc107;
+  border-radius:12px;
+  padding:12px 20px;
+  font-size:14px;
+  font-weight:600;
+  color:#856404;
+  margin-bottom:16px;
+  display:none;
+  width:100%;max-width:320px;
+}
+.timer-aviso.visible{display:block;}
+.btn-extender{
+  background:linear-gradient(135deg,#1a7a3c,#2ecc71);
+  color:#fff;
+  border:none;
+  border-radius:16px;
+  padding:16px 32px;
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+  width:100%;max-width:320px;
+  margin-bottom:10px;
+  display:none;
+}
+.btn-extender.visible{display:block;}
+.btn-finalizar{
+  background:transparent;
+  color:#888;
+  border:1px solid #ddd;
+  border-radius:16px;
+  padding:12px 32px;
+  font-size:0.9rem;
+  font-weight:600;
+  cursor:pointer;
+  width:100%;max-width:320px;
+}
+.timer-vencido{
+  display:none;
+  flex-direction:column;
+  align-items:center;
+}
+.timer-vencido.activo{display:flex;}
+.timer-vencido h2{
+  font-family:'Nunito',sans-serif;
+  font-size:1.6rem;
+  font-weight:900;
+  color:#1a7a3c;
+  margin-bottom:8px;
+}
+.timer-vencido p{color:#555;font-size:14px;margin-bottom:20px;}
 </style>
 </head>
 <body>
@@ -641,6 +756,50 @@ footer strong{color:#fff;}
   <p style="margin-top:4px;">⚡ Hecho con amor en Lima, Perú 🇵🇪</p>
 </footer>
 
+
+<!-- ─── PANTALLA TIMER ─── -->
+<div id="pantalla-timer">
+  <div class="timer-badge">⚡ Power Bank activo</div>
+  
+  <div id="timer-activo">
+    <div class="timer-circulo" id="timer-circulo">
+      <div class="timer-emoji">🔋</div>
+      <div class="timer-tiempo" id="timer-display">00:00</div>
+      <div class="timer-label">tiempo restante</div>
+    </div>
+
+    <div class="timer-info">
+      <p>Plan: <strong id="timer-plan">—</strong></p>
+      <p>Monto pagado: <strong id="timer-monto">—</strong></p>
+      <p>Slot: <strong id="timer-slot">—</strong></p>
+    </div>
+
+    <div class="timer-aviso" id="timer-aviso">
+      ⚠️ ¡Quedan 5 minutos! ¿Deseas extender tu tiempo?
+    </div>
+
+    <button class="btn-extender" id="btn-extender" onclick="extenderTiempo()">
+      ⚡ Extender 1 hora más — S/7
+    </button>
+
+    <button class="btn-finalizar" onclick="finalizarSesion()">
+      Ya devolví el power bank
+    </button>
+  </div>
+
+  <div class="timer-vencido" id="timer-vencido">
+    <div style="font-size:60px;margin-bottom:16px;">⏰</div>
+    <h2>¡Tiempo terminado!</h2>
+    <p>Por favor devuelve el power bank<br>a cualquier estación CargaYa.</p>
+    <button class="btn-extender visible" onclick="extenderTiempo()" style="display:block;margin-bottom:10px;">
+      ⚡ Extender 1 hora más — S/7
+    </button>
+    <button class="btn-finalizar" onclick="finalizarSesion()">
+      Ya lo devolví
+    </button>
+  </div>
+</div>
+
 <!-- ─── MODALES ─── -->
 
 <!-- Términos -->
@@ -754,12 +913,20 @@ footer strong{color:#fff;}
     Culqi.open();
   }
 
+  // Variables del timer
+  let timerInterval = null;
+  let segundosRestantes = 0;
+  let tokenGuardado = null;
+  let emailGuardado = null;
+  let slotGuardado = null;
+
   // Función que Culqi llama cuando el pago es exitoso
   function culqi() {
     if (Culqi.token) {
-      // Pago exitoso: enviar token al backend para procesar
       const token = Culqi.token.id;
       const email = Culqi.token.email;
+      tokenGuardado = token;
+      emailGuardado = email;
 
       fetch('/api/pagar', {
         method: 'POST',
@@ -767,7 +934,7 @@ footer strong{color:#fff;}
         body: JSON.stringify({
           token: token,
           email: email,
-          monto: planSeleccionado.monto * 100,
+          monto: planSeleccionado.monto,
           horas: planSeleccionado.horas
         })
       })
@@ -775,9 +942,10 @@ footer strong{color:#fff;}
       .then(data => {
         Culqi.close();
         if (data.success) {
-          alert(`✅ ¡Pago exitoso!\n\nTu power bank saldrá en unos segundos.\n\nDuración: ${planSeleccionado.horas} hora${planSeleccionado.horas>1?'s':''}\nMonto cobrado: S/${planSeleccionado.monto}`);
+          slotGuardado = data.slot || '—';
+          iniciarTimer(planSeleccionado.horas, planSeleccionado.monto, slotGuardado);
         } else {
-          alert('❌ Error al procesar el pago. Intenta nuevamente.');
+          alert('❌ ' + (data.mensaje || 'Error al procesar el pago.'));
         }
       })
       .catch(() => {
@@ -788,6 +956,109 @@ footer strong{color:#fff;}
     } else if (Culqi.error) {
       alert('❌ Error: ' + Culqi.error.user_message);
     }
+  }
+
+  function iniciarTimer(horas, monto, slot) {
+    segundosRestantes = horas * 60 * 60;
+    const totalSegundos = segundosRestantes;
+
+    // Mostrar info
+    document.getElementById('timer-plan').textContent = horas + ' hora' + (horas>1?'s':'');
+    document.getElementById('timer-monto').textContent = 'S/' + monto;
+    document.getElementById('timer-slot').textContent = 'Slot ' + slot;
+
+    // Mostrar pantalla timer
+    document.getElementById('pantalla-timer').classList.add('activo');
+    document.getElementById('timer-activo').style.display = 'flex';
+    document.getElementById('timer-activo').style.flexDirection = 'column';
+    document.getElementById('timer-activo').style.alignItems = 'center';
+    document.getElementById('timer-vencido').classList.remove('activo');
+
+    timerInterval = setInterval(() => {
+      segundosRestantes--;
+      const progreso = (segundosRestantes / totalSegundos) * 100;
+      document.getElementById('timer-circulo').style.setProperty('--progress', progreso + '%');
+
+      const h = Math.floor(segundosRestantes / 3600);
+      const m = Math.floor((segundosRestantes % 3600) / 60);
+      const s = segundosRestantes % 60;
+      const display = h > 0
+        ? h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+        : String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      document.getElementById('timer-display').textContent = display;
+
+      // Aviso a 5 minutos
+      if (segundosRestantes === 300) {
+        document.getElementById('timer-aviso').classList.add('visible');
+        document.getElementById('btn-extender').classList.add('visible');
+      }
+
+      // Tiempo terminado
+      if (segundosRestantes <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timer-activo').style.display = 'none';
+        document.getElementById('timer-vencido').classList.add('activo');
+      }
+    }, 1000);
+  }
+
+  function extenderTiempo() {
+    if (!tokenGuardado || !emailGuardado) {
+      alert('Por favor vuelve a pagar para extender el tiempo.');
+      return;
+    }
+    // Abrir Culqi para pagar la extensión
+    Culqi.publicKey = "pk_test_eLaejI2frA9LpArx";
+    Culqi.settings({
+      title: 'CargaYa — Extensión',
+      currency: 'PEN',
+      description: 'Extender 1 hora más',
+      amount: 700
+    });
+    Culqi.options({ lang: 'auto', modal: true, installments: false,
+      paymentMethods: { tarjeta: true, yape: true, billetera: false, bancaMovil: false, agente: false, cuotealo: false }
+    });
+    // Override culqi callback para extensión
+    window._modoExtension = true;
+    Culqi.open();
+  }
+
+  // Interceptar callback de Culqi para extensión
+  const _culqiOriginal = window.culqi;
+  window.culqi = function() {
+    if (window._modoExtension && Culqi.token) {
+      window._modoExtension = false;
+      const token = Culqi.token.id;
+      const email = Culqi.token.email;
+      fetch('/api/extender', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, email, horas: 1, monto: 7 })
+      })
+      .then(r => r.json())
+      .then(data => {
+        Culqi.close();
+        if (data.success) {
+          // Agregar 1 hora al timer
+          segundosRestantes += 3600;
+          document.getElementById('timer-aviso').classList.remove('visible');
+          document.getElementById('btn-extender').classList.remove('visible');
+          document.getElementById('timer-activo').style.display = 'flex';
+          document.getElementById('timer-vencido').classList.remove('activo');
+          alert('✅ ¡Tiempo extendido 1 hora más!');
+        } else {
+          alert('❌ ' + (data.mensaje || 'Error al extender.'));
+        }
+      });
+    } else {
+      _culqiOriginal && _culqiOriginal();
+    }
+  }
+
+  function finalizarSesion() {
+    clearInterval(timerInterval);
+    document.getElementById('pantalla-timer').classList.remove('activo');
+    alert('✅ ¡Gracias por usar CargaYa! Hasta pronto 🔋');
   }
 
   function abrirModal(id) {
