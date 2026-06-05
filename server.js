@@ -173,7 +173,9 @@ app.post('/api/pagar', async (req, res) => {
       try {
         const estacion = await axios.get(`${HEYCHARGE_URL}/v1/station/${STATION_ID}`, { headers: jsonHeaders() })
         const baterias = estacion.data.batteries || []
-        const disponible = baterias.find(b => b.lock_status === '1' && b.battery_abnormal === '0')
+        const disponible = baterias
+          .filter(b => b.lock_status === '1' && b.battery_abnormal === '0')
+          .sort((a, b) => parseInt(b.battery_capacity) - parseInt(a.battery_capacity))[0] // CORRECCIÓN: batería con más carga primero
         if (disponible) {
           battery_id = disponible.battery_id
           slot_id = disponible.slot_id
@@ -220,6 +222,53 @@ app.post('/api/pagar', async (req, res) => {
     res.status(500).json({ success: false, mensaje: 'Error al procesar el pago. Intenta de nuevo.' })
   }
 })
+
+// ══════════════════════════════════════════════
+// RUTA NUEVA - EXTENDER TIEMPO (para el timer)
+// ══════════════════════════════════════════════
+
+app.post('/api/extender', async (req, res) => {
+  try {
+    const { token, email, horas, monto } = req.body
+
+    if (!token || !email || !horas || !monto) {
+      return res.status(400).json({ success: false, mensaje: 'Faltan datos requeridos' })
+    }
+
+    console.log(`Extendiendo tiempo: ${email} - S/${monto} (${horas}h extra)`)
+
+    const charge = await culqi.charges.createCharge({
+      amount: String(Math.round(monto * 100)),
+      currency_code: 'PEN',
+      email: email,
+      source_id: token,
+      description: `CargaYa - Extensión ${horas} hora${horas > 1 ? 's' : ''} extra`,
+      metadata: { horas: String(horas), station_id: STATION_ID, tipo: 'extension' }
+    })
+
+    console.log(`Extensión Culqi: ${charge.id} -> ${charge.outcome?.type}`)
+
+    if (charge.outcome && charge.outcome.type === 'venta_exitosa') {
+      res.json({
+        success: true,
+        charge_id: charge.id,
+        monto,
+        horas,
+        mensaje: `Tiempo extendido ${horas} hora${horas > 1 ? 's' : ''} más. ¡Disfruta!`
+      })
+    } else {
+      res.json({
+        success: false,
+        mensaje: charge.outcome?.merchant_message || 'Pago rechazado. Intenta con otro método.'
+      })
+    }
+
+  } catch (error) {
+    console.error('Error en /api/extender:', error.message)
+    res.status(500).json({ success: false, mensaje: 'Error al procesar la extensión. Intenta de nuevo.' })
+  }
+})
+
 
 // ══════════════════════════════════════════════
 // WEBHOOK CULQI
@@ -278,5 +327,5 @@ app.listen(PORT, () => {
   console.log(`HeyCharge API Key: ${API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA'}`)
   console.log(`Culqi: ${process.env.CULQI_PRIVATE_KEY ? 'Configurado' : 'NO CONFIGURADO'}`)
   console.log(`Estacion: ${STATION_ID}`)
-  console.log(`Rutas: GET /api/estacion | GET /api/baterias | POST /api/pagar | POST /api/liberar | POST /api/expulsar | POST /api/forzar | POST /api/reiniciar`)
+  console.log(`Rutas: GET /api/estacion | GET /api/baterias | POST /api/pagar | POST /api/liberar | POST /api/expulsar | POST /api/forzar | POST /api/reiniciar | POST /api/extender`)
 })
